@@ -18,14 +18,19 @@ public class CartPoleAgent : Agent
 
     public override void AgentReset()
     {
-        this.transform.position = Axis.position + new Vector3(UnityEngine.Random.value * 1.0f - 0.5f, 0, 0);
-        Goal.position = Axis.position + new Vector3(UnityEngine.Random.value * 7.0f - 3.5f, 0, -0.1f);
-        this.rBody.velocity = Vector3.zero;
+        float CartPos = Axis.position.x - this.transform.position.x;
+        if ((Pole.eulerAngles.z > 40 && Pole.eulerAngles.z < 360 - 40) || (CartPos > 5.0f || CartPos < -5.0f))
+        {
+            this.transform.position = Axis.position + new Vector3(UnityEngine.Random.value * 1.0f - 0.5f, 0, 0);
+            this.rBody.velocity = Vector3.zero;
 
-        Pole.position = this.transform.position + new Vector3(0,0.75f,0);
-        Pole.eulerAngles = new Vector3(0, 0, UnityEngine.Random.value * 20.0f - 10.1f);
-        PoleRigdbody.angularVelocity = Vector3.zero;
-        PoleRigdbody.velocity = Vector3.zero;
+            Pole.position = this.transform.position + new Vector3(0, 0.75f, 0);
+            Pole.eulerAngles = new Vector3(0, 0, UnityEngine.Random.value * 20.0f - 10.1f);
+            PoleRigdbody.angularVelocity = Vector3.zero;
+            PoleRigdbody.velocity = Vector3.zero;
+        }
+        
+        Goal.position = Axis.position + new Vector3(UnityEngine.Random.value * 7.0f - 3.5f, 0, -0.1f);
     }
 
     public override void CollectObservations()
@@ -54,7 +59,9 @@ public class CartPoleAgent : Agent
         // Rewards
         float CartPos = Axis.position.x - this.transform.position.x;
         float GoalError = Goal.position.x - this.transform.position.x;
-        SetReward(1.0f + 1 / (1 + 20f*Mathf.Abs(GoalError)));
+        //SetReward(1.0f + 1 / (1 + 0.5f*Mathf.Abs(GoalError)));
+        //SetReward(1.0f + 1 / (1 + 0.5f*GoalError*GoalError));
+        SetReward(1.0f + 1 / (1 + 3.0f * Mathf.Pow(GoalError, 4)));
 
         if ((Pole.eulerAngles.z > 40 && Pole.eulerAngles.z < 360 - 40)||(CartPos > 5.0f||CartPos < -5.0f))
         {
